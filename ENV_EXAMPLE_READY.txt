@@ -1,0 +1,17 @@
+# انسخ هذا المحتوى وأنشئ ملف .env.local في مجلد المشروع
+
+# Google Sheets Configuration
+GOOGLE_SHEETS_ID=ضع_هنا_الـSheet_ID_الذي_نسخته
+GOOGLE_CLIENT_EMAIL=ضع_هنا_client_email_من_ملف_JSON
+GOOGLE_PRIVATE_KEY="ضع_هنا_private_key_من_ملف_JSON"
+
+# مثال كامل:
+# GOOGLE_SHEETS_ID=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
+# GOOGLE_CLIENT_EMAIL=cv-management@my-project-123456.iam.gserviceaccount.com  
+# GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC...\n-----END PRIVATE KEY-----"
+
+# ملاحظات مهمة:
+# 1. الـ Sheet ID هو الجزء الطويل من رابط الشيت
+# 2. الـ client_email و private_key موجودين في ملف JSON الذي حملته
+# 3. تأكد من وضع علامات الاقتباس حول private_key
+# 4. احتفظ بـ \n في بداية ونهاية private_key

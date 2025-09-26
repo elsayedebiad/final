@@ -1,0 +1,29 @@
+# إعداد متغيرات البيئة لـ Google Sheets
+
+أنشئ ملف .env.local في مجلد المشروع وأضف هذه المتغيرات:
+
+# Google Sheets Configuration
+GOOGLE_SHEETS_ID=your_spreadsheet_id_here
+GOOGLE_CLIENT_EMAIL=your-service-account@your-project.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour_Private_Key_Here\n-----END PRIVATE KEY-----"
+
+# كيفية الحصول على القيم:
+
+1. GOOGLE_SHEETS_ID:
+   - انسخه من رابط الشيت (بين /d/ و /edit)
+   - مثال: https://docs.google.com/spreadsheets/d/1ABC123DEF456/edit
+   - الـ ID هو: 1ABC123DEF456
+
+2. GOOGLE_CLIENT_EMAIL:
+   - من ملف JSON الذي حملته
+   - ابحث عن "client_email"
+
+3. GOOGLE_PRIVATE_KEY:
+   - من ملف JSON الذي حملته  
+   - ابحث عن "private_key"
+   - تأكد من وضع \n في بداية ونهاية المفتاح
+
+مثال كامل:
+GOOGLE_SHEETS_ID=1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
+GOOGLE_CLIENT_EMAIL=cv-management@my-project-123456.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC...\n-----END PRIVATE KEY-----"

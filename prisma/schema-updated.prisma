@@ -1,0 +1,201 @@
+// Updated Prisma schema for Al-Gaeid Recruitment CV Management System
+// Supports all fields from the Al-Gaeid CV template
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  createdCVs    CV[]           @relation("CVCreatedBy")
+  updatedCVs    CV[]           @relation("CVUpdatedBy")
+  activities    ActivityLog[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model CV {
+  id              String    @id @default(cuid())
+  
+  // Basic Information
+  fullName        String
+  fullNameArabic  String?
+  email           String?
+  phone           String?
+  referenceCode   String?   // Code like EA125
+  
+  // Employment Details
+  monthlySalary   String?
+  contractPeriod  String?
+  position        String?
+  
+  // Passport Information
+  passportNumber  String?
+  passportIssueDate String?
+  passportExpiryDate String?
+  passportIssuePlace String?
+  
+  // Personal Information
+  nationality     String?
+  religion        String?
+  dateOfBirth     String?
+  placeOfBirth    String?
+  livingTown      String?
+  maritalStatus   MaritalStatus?
+  numberOfChildren Int?
+  weight          String?
+  height          String?
+  complexion      String?
+  age             Int?
+  
+  // Languages and Education
+  englishLevel    SkillLevel?
+  arabicLevel     SkillLevel?
+  
+  // Skills and Experiences (All with YES/NO/WILLING options)
+  babySitting     SkillLevel?
+  childrenCare    SkillLevel?
+  tutoring        SkillLevel?
+  disabledCare    SkillLevel?
+  cleaning        SkillLevel?
+  washing         SkillLevel?
+  ironing         SkillLevel?
+  arabicCooking   SkillLevel?
+  sewing          SkillLevel?
+  driving         SkillLevel?
+  
+  // Previous Employment Abroad (JSON format)
+  previousEmployment String? // JSON array of {period, country, position}
+  
+  // Profile Image
+  profileImage    String?
+  
+  // Legacy fields for backward compatibility
+  experience      String?
+  education       String?
+  skills          String?
+  summary         String?
+  content         String?   // Rich text content
+  notes           String?
+  attachments     String?   // JSON array of file paths
+  
+  // System fields
+  status          CVStatus  @default(NEW)
+  priority        Priority  @default(MEDIUM)
+  source          String?   // Manual, Excel, etc.
+  
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdById     String
+  updatedById     String?
+  
+  // Relations
+  createdBy       User      @relation("CVCreatedBy", fields: [createdById], references: [id])
+  updatedBy       User?     @relation("CVUpdatedBy", fields: [updatedById], references: [id])
+  activities      ActivityLog[]
+  versions        CVVersion[]
+
+  @@map("cvs")
+}
+
+model CVVersion {
+  id        String   @id @default(cuid())
+  cvId      String
+  content   String   // Snapshot of CV content
+  version   Int
+  createdAt DateTime @default(now())
+  createdBy String
+
+  cv CV @relation(fields: [cvId], references: [id], onDelete: Cascade)
+
+  @@unique([cvId, version])
+  @@map("cv_versions")
+}
+
+model ActivityLog {
+  id          String       @id @default(cuid())
+  userId      String
+  cvId        String?
+  action      ActivityType
+  description String
+  metadata    String?      // JSON data
+  createdAt   DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  cv   CV?  @relation(fields: [cvId], references: [id])
+
+  @@map("activity_logs")
+}
+
+enum Role {
+  ADMIN
+  SUB_ADMIN
+  USER
+}
+
+enum CVStatus {
+  NEW
+  BOOKED
+  HIRED
+  REJECTED
+  ARCHIVED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum SkillLevel {
+  YES
+  NO
+  WILLING
+}
+
+enum ActivityType {
+  CV_CREATED
+  CV_UPDATED
+  CV_DELETED
+  CV_STATUS_CHANGED
+  CV_EXPORTED
+  USER_LOGIN
+  USER_LOGOUT
+  EXCEL_IMPORT
+}
