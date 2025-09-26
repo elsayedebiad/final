@@ -1,55 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// إنشاء حساب المدير العام الخاص
-export async function POST(request: NextRequest) {
-  try {
-    const { email, password, name } = await request.json()
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
 
-    // التحقق من وجود الحساب مسبقاً
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
+  const secret = searchParams.get('secret')
+  const email = searchParams.get('email')
+  const password = searchParams.get('password')
+  const name = searchParams.get('name') || 'Super Admin'
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'المستخدم موجود بالفعل' },
-        { status: 400 }
-      )
-    }
-
-    // تشفير كلمة المرور
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // إنشاء المستخدم
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-        role: 'SUPER_ADMIN', // دور خاص للمدير العام
-        isActive: true
-      }
-    })
-
-    return NextResponse.json({
-      message: 'تم إنشاء حساب المدير العام بنجاح',
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role
-      }
-    })
-
-  } catch (error) {
-    console.error('Error creating super admin:', error)
-    return NextResponse.json(
-      { error: 'حدث خطأ أثناء إنشاء الحساب' },
-      { status: 500 }
-    )
+  if (secret !== process.env.ADMIN_SETUP_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  if (!email || !password) {
+    return NextResponse.json({ error: 'email & password required' }, { status: 400 })
+  }
+
+  const exists = await prisma.user.findUnique({ where: { email } })
+  if (exists) {
+    return NextResponse.json({ ok: true, message: 'Admin already exists' })
+  }
+
+  const hash = await bcrypt.hash(password, 12)
+  const user = await prisma.user.create({
+    data: {
+      email,
+      password: hash,   // غيّرها لو العمود عندك اسمه hashedPassword
+      name,
+      role: 'ADMIN',    // أو isAdmin: true لو سكيمتك كده
+    },
+  })
+
+  return NextResponse.json({ ok: true, id: user.id, email: user.email })
 }
